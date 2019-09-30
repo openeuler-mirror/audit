@@ -1,0 +1,29 @@
+From cc434ad723bba5c7da4d8e440130f55a9437961c Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Sat, 15 Dec 2018 09:55:29 -0500
+Subject: [PATCH 206/217] Fix memory leak when logs are corrupted
+
+---
+ auparse/ellist.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/auparse/ellist.c b/auparse/ellist.c
+index 90a0524..fd45fac 100644
+--- a/auparse/ellist.c
++++ b/auparse/ellist.c
+@@ -331,8 +331,11 @@ int aup_list_append(event_list_t *l, char *record, int list_idx,
+ 
+ 	// Then parse the record up into nvlist
+ 	rc = parse_up_record(r);
+-	if (r->cwd)
++	if (r->cwd) {
++		// Should never be 2 cwd records unless log is corrupted
++		free(l->cwd);
+ 		l->cwd = r->cwd;
++	}
+ 	return rc;
+ }
+ 
+-- 
+1.8.3.1
+

@@ -1,0 +1,43 @@
+From bbbebbef926376a7bec116a2cc3aadd86af75bb4 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Sat, 15 Dec 2018 14:12:56 -0500
+Subject: [PATCH 209/217] Fix a couple more fuzzer induced bugs
+
+---
+ src/ausearch-parse.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/ausearch-parse.c b/src/ausearch-parse.c
+index 44499c7..311f699 100644
+--- a/src/ausearch-parse.c
++++ b/src/ausearch-parse.c
+@@ -603,6 +603,8 @@ static int parse_syscall(lnode *n, search_items *s)
+ 				if (s->key) {
+ 					char *saved;
+ 					char *keyptr = unescape(str);
++					if (keyptr == NULL)
++						return 45;
+ 					char *kptr = strtok_r(keyptr,
+ 							key_sep, &saved);
+ 					while (kptr) {
+@@ -1599,6 +1601,8 @@ static int parse_sockaddr(const lnode *n, search_items *s)
+ 			str += 6;
+ 			len = strlen(str)/2;
+ 			s->hostname = unescape(str);
++			if (s->hostname == NULL)
++				return 4;
+ 			saddr = (struct sockaddr *)s->hostname;
+ 			if (saddr->sa_family == AF_INET) {
+ 				if (len < sizeof(struct sockaddr_in)) {
+@@ -2300,6 +2304,8 @@ static int parse_simple_message(const lnode *n, search_items *s)
+ 				if (s->key) {
+ 					char *saved;
+ 					char *keyptr = unescape(ptr);
++					if (keyptr == NULL)
++						return 8;
+ 					char *kptr = strtok_r(keyptr,
+ 						key_sep, &saved);
+ 					while (kptr) {
+-- 
+1.8.3.1
+

@@ -1,0 +1,33 @@
+From 5d206ce4ac545595170d1ed1490d4824b442bd19 Mon Sep 17 00:00:00 2001
+From: Helmut Grohne <helmut@subdivi.de>
+Date: Mon, 1 Oct 2018 07:48:54 +0200
+Subject: [PATCH 177/217] bindings/swig/src/auditswig.i: Do not hardcode the
+ path of stdint.h
+
+auditswig.i hard codes the path to stdint.h. That will fail to work with
+non-glibc libcs and after moving glibc's headers (#798955). The path is
+hard coded, because swig's %include does not search the standard header
+search path. Rather than using %include here, we can use #include,
+because stdint.h does not declare any functions. Thus swig entirely
+ignores stdint.h and leaves the search to the C compiler.
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=909967
+---
+ bindings/swig/src/auditswig.i | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bindings/swig/src/auditswig.i b/bindings/swig/src/auditswig.i
+index 356a5ab..7ebb373 100644
+--- a/bindings/swig/src/auditswig.i
++++ b/bindings/swig/src/auditswig.i
+@@ -41,6 +41,6 @@ typedef unsigned __u32;
+ typedef unsigned uid_t;
+ %include "/usr/include/linux/audit.h"
+ #define __extension__ /*nothing*/
+-%include "/usr/include/stdint.h"
++#include <stdint.h>
+ %include "../lib/libaudit.h"
+ 
+-- 
+1.8.3.1
+

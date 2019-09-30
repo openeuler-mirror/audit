@@ -1,0 +1,25 @@
+From 5b62b99bcdba4bf9cc3c03a0ffc26d6b9b7a56ce Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Sat, 15 Dec 2018 13:35:29 -0500
+Subject: [PATCH 208/217] fix out of bound read on shutdown
+
+---
+ src/auditd-listen.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/auditd-listen.c b/src/auditd-listen.c
+index 9db5f35..a2560ad 100644
+--- a/src/auditd-listen.c
++++ b/src/auditd-listen.c
+@@ -1118,7 +1118,7 @@ 
+ #endif
+ 
+ 	ev_io_stop(loop, &tcp_listen_watcher);
+-	while (nlsocks >= 0) {
++	while (nlsocks > 0) {
+ 		nlsocks--;
+ 		close(listen_socket[nlsocks]);
+ 	}
+--
+1.8.3.1
+

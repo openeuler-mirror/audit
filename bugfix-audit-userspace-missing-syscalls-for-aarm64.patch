@@ -1,0 +1,70 @@
+From ad68debcab63df34dc7b1fc4b4fd4fc4f01b8d7c Mon Sep 17 00:00:00 2001
+From: jinbo <jinbo8@huawei.com>
+Date: Mon, 12 Nov 2018 21:54:29 +0800
+Subject: [PATCH] audit: userspace missing syscalls for aarm64
+
+API_change: n
+reason: reconsitution userspace audit missing syscalls for aarm64
+
+Signed-off-by: jinbo <jinbo8@huawei.com>
+---
+ lib/aarch64_table.h | 44 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+
+diff --git a/lib/aarch64_table.h b/lib/aarch64_table.h
+index c61aa91..ea634c1 100644
+--- a/lib/aarch64_table.h
++++ b/lib/aarch64_table.h
+@@ -295,5 +295,49 @@ _S(287, "pwritev2")
+ _S(288, "pkey_mprotect")
+ _S(289, "pkey_alloc")
+ _S(290, "pkey_free")
+ _S(291, "statx")
+ _S(292, "io_pgetevents")
++_S(1024, "open")
++_S(1025, "link")
++_S(1026, "unlink")
++_S(1027, "mknod")
++_S(1028, "chmod")
++_S(1029, "chown")
++_S(1030, "mkdir")
++_S(1031, "rmdir")
++_S(1032, "lchown")
++_S(1033, "access")
++_S(1034, "rename")
++_S(1035, "readlink")
++_S(1036, "symlink")
++_S(1037, "utimes")
++_S(1038, "stat64")
++_S(1039, "lstat64")
++_S(1040, "pipe")
++_S(1041, "dup2")
++_S(1042, "epoll_create")
++_S(1043, "inotify_init")
++_S(1044, "eventfd")
++_S(1045, "signalfd")
++_S(1049, "newstat")
++_S(1050, "newlstat")
++_S(1059, "alarm")
++_S(1060, "getpgrp")
++_S(1061, "pause")
++_S(1062, "time")
++_S(1063, "utime")
++_S(1064, "creat")
++_S(1066, "futimesat")
++_S(1067, "select")
++_S(1068, "poll")
++_S(1069, "epoll_wait")
++_S(1070, "ustat")
++_S(1071, "vfork")
++_S(1073, "recv")
++_S(1074, "send")
++_S(1075, "bdflush")
++_S(1076, "oldumount")
++_S(1077, "uselib")
++_S(1078, "sysctl")
++_S(1079, "fork")
++
+-- 
+1.8.5.6
+

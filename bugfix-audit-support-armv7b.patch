@@ -1,0 +1,28 @@
+From bfef4279f55301e84873f092c48d543609b8793f Mon Sep 17 00:00:00 2001
+From: jinbo <jinbo8@huawei.com>
+Date: Mon, 12 Nov 2018 22:11:01 +0800
+Subject: [PATCH] audit: support armv7b
+
+API_change: n
+reason: reconsitution audit support armv7b
+
+Signed-off-by: jinbo <jinbo8@huawei.com>
+---
+ lib/machinetab.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/machinetab.h b/lib/machinetab.h
+index 7172d58..c44d656 100644
+--- a/lib/machinetab.h
++++ b/lib/machinetab.h
+@@ -41,6 +41,7 @@ _S(MACH_ARM,   "armv5tejl")
+ _S(MACH_ARM,   "armv5tel")
+ _S(MACH_ARM,   "armv6l")
+ _S(MACH_ARM,   "armv7l")
++_S(MACH_ARM,   "armv7b")
+ #endif
+ #ifdef WITH_AARCH64
+ _S(MACH_AARCH64,   "aarch64"  )
+-- 
+1.8.5.6
+

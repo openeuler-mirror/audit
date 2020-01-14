@@ -3,7 +3,7 @@
 Summary:            User space tools for kernel auditing
 Name:               audit
 Version:            3.0
-Release:            3
+Release:            4
 License:            GPLv2+ and LGPLv2+
 URL:                http://people.redhat.com/sgrubb/audit/
 Source0:            http://people.redhat.com/sgrubb/audit/%{name}-%{version}-alpha5.tar.gz
@@ -38,7 +38,6 @@ Provides:           audit-libs%{?_isa}  = %{version}-%{release}
 Provides:           audispd-plugins = %{version}-%{release}
 Provides:           audispd-plugins-zos = %{version}-%{release}
 Obsoletes:          audit-libs < %{version}-%{release}
-Obsoletes:          audit-libs%{?_isa}  < %{version}-%{release}
 Obsoletes:          audispd-plugins < %{version}-%{release}
 Obsoletes:          audispd-plugins-zos < %{version}-%{release}
 
@@ -250,6 +249,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Tue Jan 14 2020 openEuler Buildteam <buildteam@openeuler.org> - 3.0-4
+- clean code
+
 * Wed Oct 9 2019 openEuler Buildteam <buildteam@openeuler.org> - 3.0-3
 - Adjust requires
 

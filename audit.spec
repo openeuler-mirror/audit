@@ -2,25 +2,17 @@
 
 Summary:            User space tools for kernel auditing
 Name:               audit
-Version:            3.0
-Release:            5
+Version:            2.8.5
+Release:            1
 License:            GPLv2+ and LGPLv2+
-URL:                http://people.redhat.com/sgrubb/audit/
-Source0:            http://people.redhat.com/sgrubb/audit/%{name}-%{version}-alpha5.tar.gz
+URL:                https://people.redhat.com/sgrubb/audit/
+Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source1:            https://www.gnu.org/licenses/lgpl-2.1.txt
 
-Patch6000:          bindings-swig-src-auditswig.i-Do-not-hardcode-the-pa.patch
-Patch6001:          Fix-memory-leak-when-logs-are-corrupted.patch
-Patch6002:          fix-out-of-bound-read-on-shutdown.patch
-Patch6003:          Fix-a-couple-more-fuzzer-induced-bugs.patch
-Patch6004:          More-fuzzer-induced-bug-fixes.patch
-Patch6005:          Fix-memleak-in-auparse-caused-by-corrected-event-ordering.patch
-Patch6006:          Port-af_unix-plugin-to-libev.patch
-Patch6007:          0067-Fix-minor-memory-leak-in-auditd-kerberos-credentials.patch
-
-Patch9000:          bugfix-audit-support-armv7b.patch
-Patch9001:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
-Patch9002:          bugfix-audit-reload-coredump.patch
+Patch0:          Fix-memleak-in-auparse-caused-by-corrected-event-ordering.patch
+Patch1:          bugfix-audit-support-armv7b.patch
+Patch2:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
+Patch3:          bugfix-audit-reload-coredump.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -74,7 +66,6 @@ License:            LGPLv2+
 Requires:           %{name}%{?_isa} = %{version}-%{release}
 Requires:           kernel-headers >= 2.6.29
 Provides:           audit-libs-devel audit-libs-static
-Obsoletes:          audit-libs-devel audit-libs-static
 
 %description devel
 The audit-libs-devel package contains the header files needed for developing
@@ -196,6 +187,7 @@ fi
 %attr(755,root,root) /sbin/ausearch
 %attr(755,root,root) /sbin/aureport
 %attr(750,root,root) /sbin/autrace
+%attr(755,root,root) /sbin/audispd
 %attr(755,root,root) /sbin/augenrules
 %attr(755,root,root) %{_bindir}/aulast
 %attr(755,root,root) %{_bindir}/aulastlog
@@ -219,7 +211,8 @@ fi
 %ghost %config(noreplace) %attr(600,root,root) /etc/audit/rules.d/audit.rules
 %ghost %config(noreplace) %attr(640,root,root) /etc/audit/audit.rules
 %config(noreplace) %attr(640,root,root) /etc/audit/audit-stop.rules
-%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/af_unix.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/audispd.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/af_unix.conf
 
 %files libs
 /%{_lib}/libaudit.so.1*
@@ -227,16 +220,15 @@ fi
 %config(noreplace) %attr(640,root,root) /etc/libaudit.conf
 
 %files -n audispd-plugins
-%config(noreplace) %attr(640,root,root) /etc/audit/audisp-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/au-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/syslog.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/audisp-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/au-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/syslog.conf
 %attr(750,root,root) /sbin/audisp-remote
-%attr(750,root,root) /sbin/audisp-syslog
 %attr(700,root,root) %dir %{_var}/spool/audit
 
 %files -n audispd-plugins-zos
-%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audit/zos-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/audispd-zos-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audisp/zos-remote.conf
 %attr(750,root,root) /sbin/audispd-zos-remote
 
 %files devel
@@ -276,6 +268,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Wed Jul 29 2020 wangchen <wangchen137@huawei.com> - 2.8.5-1
+- revert to 2.8.5
+
 * Wed Jan 22 2020 openEuler Buildteam <buildteam@openeuler.org> - 3.0-5
 - add subpackages
 

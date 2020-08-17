@@ -4,7 +4,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            2.8.5
-Release:            1
+Release:            2
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -21,7 +21,7 @@ BuildRequires:      python2 python-unversioned-command
 %ifarch %{golang_arches}
 BuildRequires:      golang
 %endif
-Requires:           %{name}-libs = %{version}-%{release}
+Requires:           %{name}-libs = %{epoch}:%{version}-%{release}
 Requires(post):     systemd coreutils
 Requires(preun):    systemd
 Requires(postun):   systemd coreutils
@@ -43,8 +43,8 @@ applications to use the audit framework.
 %package -n audispd-plugins
 Summary: Plugins for audit event dispatcher
 License: GPLv2+
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 
 %description -n audispd-plugins
 This package provides plugins for the real-time interface to audispd.
@@ -52,8 +52,8 @@ This package provides plugins for the real-time interface to audispd.
 %package -n audispd-plugins-zos
 Summary: z/OS plugin for audit event dispatcher
 License: GPLv2+
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-libs = %{version}-%{release}
+Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: openldap
 
 %description -n audispd-plugins-zos
@@ -64,7 +64,7 @@ database.
 %package devel
 Summary:            Header files for libaudit
 License:            LGPLv2+
-Requires:           %{name}%{?_isa} = %{version}-%{release}
+Requires:           %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:           kernel-headers >= 2.6.29
 Provides:           audit-libs-devel audit-libs-static
 
@@ -76,7 +76,7 @@ applications that need to use the audit framework libraries.
 Summary:            Python2 bindings for libaudit
 License:            LGPLv2+
 BuildRequires:      python2-devel
-Requires:           %{name}%{?_isa} = %{version}-%{release}
+Requires:           %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Provides:           audit-libs-python = %{version}-%{release}
 Provides:           audit-libs-python%{?_isa} = %{version}-%{release}
 Obsoletes:          audit-libs-python < %{version}-%{release}
@@ -92,7 +92,7 @@ libauparse can be used by python2.
 Summary:            Python3 bindings for libaudit
 License:            LGPLv2+
 BuildRequires:      python3-devel
-Requires:           %{name}%{?_isa} = %{version}-%{release}
+Requires:           %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Provides:           audit-libs-python3 = %{version}-%{release}
 Provides:           audit-libs-python3%{?_isa} = %{version}-%{release}
 Obsoletes:          audit-libs-python3 < %{version}-%{release}
@@ -269,6 +269,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Mon Aug 17 2020 zhangchenfeng <zhangchenfeng1@huawei.com> - 2.8.5-2
+- add epoch for requires
+
 * Tue Aug 11 2020 wangchen <wangchen137@huawei.com> - 2.8.5-1
 - revert to 2.8.5
 

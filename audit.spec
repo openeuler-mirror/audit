@@ -1,10 +1,8 @@
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            2.8.5
-Release:            2
+Release:            3
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -17,7 +15,6 @@ Patch3:          bugfix-audit-reload-coredump.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
-BuildRequires:      python2 python-unversioned-command
 %ifarch %{golang_arches}
 BuildRequires:      golang
 %endif
@@ -72,22 +69,6 @@ Provides:           audit-libs-devel audit-libs-static
 The audit-libs-devel package contains the header files needed for developing
 applications that need to use the audit framework libraries.
 
-%package -n python2-audit
-Summary:            Python2 bindings for libaudit
-License:            LGPLv2+
-BuildRequires:      python2-devel
-Requires:           %{name}%{?_isa} = %{epoch}:%{version}-%{release}
-Provides:           audit-libs-python = %{version}-%{release}
-Provides:           audit-libs-python%{?_isa} = %{version}-%{release}
-Obsoletes:          audit-libs-python < %{version}-%{release}
-Provides:           audit-libs-python2 = %{version}-%{release}
-Provides:           audit-libs-python2%{?_isa} = %{version}-%{release}
-Obsoletes:          audit-libs-python2 < %{version}-%{release}
-
-%description -n python2-audit
-The python2-audit package contains the bindings so that libaudit and
-libauparse can be used by python2.
-
 %package -n python3-audit
 Summary:            Python3 bindings for libaudit
 License:            LGPLv2+
@@ -109,7 +90,7 @@ cp %{SOURCE1} .
 autoreconf -f -i
 
 %build
-%configure --sbindir=/sbin --libdir=/%{_lib} --with-python=yes \
+%configure --sbindir=/sbin --libdir=/%{_lib} --with-python=no \
            --with-python3=yes \
            --enable-gssapi-krb5=yes --with-arm --with-aarch64 \
            --with-libcap-ng=yes --enable-zos-remote \
@@ -252,11 +233,6 @@ fi
 %{_libdir}/libaudit.a
 %{_libdir}/libauparse.a
 
-%files -n python2-audit
-%attr(755,root,root) %{python_sitearch}/_audit.so
-%attr(755,root,root) %{python_sitearch}/auparse.so
-%{python2_sitearch}/audit.py*
-
 %files -n python3-audit
 %attr(755,root,root) %{python3_sitearch}/*
 
@@ -269,6 +245,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Thu Oct 29 2020 zhangxingliang <zhangxingliang3@huawei.com> - 2.8.5-3
+- remove python2 subpackage 
+
 * Wed Aug 19 2020 wangchen <wangchen137@huawei.com> - 2.8.5-2
 - add epoch for requires
 

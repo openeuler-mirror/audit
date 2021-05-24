@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            2.8.5
-Release:            3
+Release:            4
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -189,6 +189,8 @@ fi
 %attr(750,root,root) %dir /etc/audit
 %attr(750,root,root) %dir /etc/audit/rules.d
 %attr(750,root,root) %dir /etc/audit/plugins.d
+%attr(750,root,root) %dir /etc/audisp
+%attr(750,root,root) %dir /etc/audisp/plugins.d
 %config(noreplace) %attr(640,root,root) /etc/audit/auditd.conf
 %ghost %config(noreplace) %attr(600,root,root) /etc/audit/rules.d/audit.rules
 %ghost %config(noreplace) %attr(640,root,root) /etc/audit/audit.rules
@@ -245,6 +247,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Mon May 24 2021 yixiangzhike <zhangxingliang3@huawei.com> - 2.8.5-4
+- fix directory permissions for /etc/audisp and /etc/audisp/plugins.d
+
 * Thu Oct 29 2020 zhangxingliang <zhangxingliang3@huawei.com> - 2.8.5-3
 - remove python2 subpackage 
 

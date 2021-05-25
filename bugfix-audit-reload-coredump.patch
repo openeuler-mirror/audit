@@ -1,7 +1,38 @@
-diff -Nur audit-3.0.org/src/auditd.c audit-3.0/src/auditd.c
---- audit-3.0.org/src/auditd.c	2019-07-30 09:29:49.420000000 +0800
-+++ audit-3.0/src/auditd.c	2019-07-30 09:58:30.484000000 +0800
-@@ -76,6 +76,7 @@
+From 2a7404291e431757bc417c9c3250f2ca84a82d89 Mon Sep 17 00:00:00 2001
+From: Leo Fang <leofang_94@163.com>
+Date: Mon, 24 May 2021 19:16:02 +0800
+Subject: [PATCH] bugfix-audit-reload-coredump
+
+---
+ src/auditd-reconfig.c |  2 ++
+ src/auditd.c          | 36 +++++++++++++++++++++++++++++-------
+ 2 files changed, 31 insertions(+), 7 deletions(-)
+
+diff --git a/src/auditd-reconfig.c b/src/auditd-reconfig.c
+index f5b00e6..5ea9126 100644
+--- a/src/auditd-reconfig.c
++++ b/src/auditd-reconfig.c
+@@ -35,6 +35,7 @@
+ 
+ /* externs we need to know about */
+ extern void reconfig_ready(void);
++extern void reconfig_pthread_failed(void);
+ 
+ /* This is the configuration manager code */
+ static pthread_t config_thread;
+@@ -122,6 +123,7 @@ static void *config_thread_main(void *arg)
+ 		//send_audit_event(AUDIT_DAEMON_CONFIG, txt);
+ 		free_config(&new_config);
+ 		free(e);
++		reconfig_pthread_failed();
+ 	}
+ 
+ 	pthread_mutex_unlock(&config_lock);
+diff --git a/src/auditd.c b/src/auditd.c
+index fa783a2..0d76e0c 100644
+--- a/src/auditd.c
++++ b/src/auditd.c
+@@ -76,6 +76,7 @@ static int hup_info_requested = 0;
  static int usr1_info_requested = 0, usr2_info_requested = 0;
  static char subj[SUBJ_LEN];
  static uint32_t session;
@@ -9,38 +40,45 @@ diff -Nur audit-3.0.org/src/auditd.c audit-3.0/src/auditd.c
  
  /* Local function prototypes */
  int send_audit_event(int type, const char *str);
-@@ -502,12 +503,24 @@
- 			if (hup_info_requested) {
+@@ -519,15 +520,30 @@ static void netlink_handler(struct ev_loop *loop, struct ev_io *io,
+ 				char hup[MAX_AUDIT_MESSAGE_LENGTH];
  				audit_msg(LOG_DEBUG,
  				    "HUP detected, starting config manager");
 -				reconfig_ev = cur_event;
 -				if (start_config_manager(cur_event)) {
--					send_audit_event(
--						AUDIT_DAEMON_CONFIG, 
--				  "op=reconfigure state=no-change "
--				  "auid=-1 pid=-1 subj=? res=failed");
 +				if(hup_flag == 0)
 +				{
 +					hup_flag = 1;
 +					reconfig_ev = cur_event;
 +					if (start_config_manager(cur_event)) {
-+						send_audit_event(
-+							AUDIT_DAEMON_CONFIG, 
-+				  	"op=reconfigure state=no-change "
-+				  	"auid=-1 pid=-1 subj=? res=failed");
-+					hup_flag = 0;
++						audit_format_signal_info(hup,
++								 	sizeof(hup),
++						 	"reconfigure state=no-change",
++							 	&cur_event->reply,
++								 	"failed");
++						send_audit_event(AUDIT_DAEMON_CONFIG,
++							 	hup);
++						hup_flag = 0;
 +					}
 +				}
 +				else
 +				{
-+						send_audit_event(
-+                                                        AUDIT_DAEMON_CONFIG,
-+                                        "op=reconfigure state=no-change "
-+                                        "auid=-1 pid=-1 subj=? res=failed");
+ 					audit_format_signal_info(hup,
+-								 sizeof(hup),
+-						 "reconfigure state=no-change",
+-							 &cur_event->reply,
+-								 "failed");
++							 	sizeof(hup),
++					 	"reconfigure state=no-change",
++						 	&cur_event->reply,
++							 	"failed");
+ 					send_audit_event(AUDIT_DAEMON_CONFIG,
+-							 hup);
++						 	hup);
  				}
  				cur_event = NULL;
  				hup_info_requested = 0;
-@@ -565,9 +578,15 @@
+@@ -571,9 +587,15 @@ static void pipe_handler(struct ev_loop *loop, struct ev_io *io,
  	// Drain the pipe - won't block because libev sets non-blocking mode
  	read(pipefds[0], buf, sizeof(buf));
  	enqueue_event(reconfig_ev);
@@ -56,22 +94,6 @@ diff -Nur audit-3.0.org/src/auditd.c audit-3.0/src/auditd.c
  void reconfig_ready(void)
  {
  	const char *msg = "ready\n";
-diff -Nur audit-3.0.org/src/auditd-reconfig.c audit-3.0/src/auditd-reconfig.c
---- audit-3.0.org/src/auditd-reconfig.c	2019-07-30 09:29:49.420000000 +0800
-+++ audit-3.0/src/auditd-reconfig.c	2019-07-30 10:00:05.232000000 +0800
-@@ -35,6 +35,7 @@
- 
- /* externs we need to know about */
- extern void reconfig_ready(void);
-+extern void reconfig_pthread_failed(void);
- 
- /* This is the configuration manager code */
- static pthread_t config_thread;
-@@ -125,6 +126,7 @@
- 		//send_audit_event(AUDIT_DAEMON_CONFIG, txt);
- 		free_config(&new_config);
- 		free(e);
-+		reconfig_pthread_failed();
- 	}
- 
- 	pthread_mutex_unlock(&config_lock);
+-- 
+1.8.3.1
+

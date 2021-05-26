@@ -1,10 +1,12 @@
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
+%define enable_audit 0
+
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            1
+Release:            2
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -194,8 +196,9 @@ if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1`
         fi
     fi
 fi
-
+%if %{enable_audit}
 %systemd_post auditd.service
+%endif
 
 %post -n audispd-plugins
 # after installing audispd-plugins
@@ -266,9 +269,11 @@ fi
 
 %postun
 /sbin/ldconfig
+%if %{enable_audit}
 if [ $1 -ge 1 ]; then
    /sbin/service auditd condrestart > /dev/null 2>&1 || :
 fi
+%endif
 
 %files
 %doc README
@@ -360,6 +365,10 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Wed May 26 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-2
+- keep auditd off by default
+- remove unused patch
+
 * Tue May 25 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-1
 - update to 3.0
 

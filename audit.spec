@@ -1,17 +1,17 @@
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
-Version:            2.8.5
-Release:            4
+Version:            3.0
+Release:            1
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source1:            https://www.gnu.org/licenses/lgpl-2.1.txt
 
-Patch0:          Fix-memleak-in-auparse-caused-by-corrected-event-ordering.patch
-Patch1:          bugfix-audit-support-armv7b.patch
-Patch2:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
-Patch3:          bugfix-audit-reload-coredump.patch
+Patch0:          bugfix-audit-support-armv7b.patch
+Patch1:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
+Patch2:          bugfix-audit-reload-coredump.patch
+Patch3:          backport-Fix-the-default-location-for-zos-remote.conf-171.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -19,7 +19,8 @@ BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
 BuildRequires:      golang
 %endif
 Requires:           %{name}-libs = %{epoch}:%{version}-%{release}
-Requires(post):     systemd coreutils
+Requires(pre):      pkgconf
+Requires(post):     systemd coreutils pkgconf
 Requires(preun):    systemd
 Requires(postun):   systemd coreutils
 
@@ -42,6 +43,7 @@ Summary: Plugins for audit event dispatcher
 License: GPLv2+
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
+Requires(post):  pkgconf
 
 %description -n audispd-plugins
 This package provides plugins for the real-time interface to audispd.
@@ -52,6 +54,7 @@ License: GPLv2+
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: openldap
+Requires(post):  pkgconf
 
 %description -n audispd-plugins-zos
 This package provides a z/OS plugin for audit event dispatcher that
@@ -138,6 +141,19 @@ make check
 %endif
 rm -f rules/Makefile*
 
+%pre
+if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+    # custom plugins, copy config files from /etc/audisp/plugins.d to /etc/audit/plugins.d
+    # self-plugins confile files will be overwritten when installing
+    plugins_config_files=`ls /etc/audisp/plugins.d/*.conf 2>/dev/null | wc -w`
+    if [ $plugins_config_files -gt 0 ];then
+        if [ ! -d /etc/audit/plugins.d/ ];then
+            mkdir -p /etc/audit/plugins.d/
+        fi
+        cp /etc/audisp/plugins.d/*.conf /etc/audit/plugins.d/
+    fi
+fi
+
 %post
 /sbin/ldconfig
 files=`ls /etc/audit/rules.d/ 2>/dev/null | wc -w`
@@ -149,7 +165,80 @@ if [ "$files" -eq 0 ] ; then
 	fi
 	chmod 0600 /etc/audit/rules.d/audit.rules
 fi
+# merge custom changes to new file
+if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+    if [ -s "/etc/audisp/plugins.d/af_unix.conf" ];then
+        diffrence=`diff /etc/audisp/plugins.d/af_unix.conf /etc/audit/plugins.d/af_unix.conf`
+        if [ "X$diffrence" != "X" ];then
+            cp /etc/audisp/plugins.d/af_unix.conf /etc/audit/plugins.d/af_unix.conf
+        fi
+    fi
+fi
 %systemd_post auditd.service
+
+%post -n audispd-plugins
+# after installing audispd-plugins
+if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+    for file in audisp-remote.conf au-remote.conf syslog.conf
+    do
+        # merge custom changes to new file
+        if [ "$file" == "audisp-remote.conf" ];then
+            if [ -s "/etc/audisp/$file" ];then
+                diffrence=`diff /etc/audisp/$file /etc/audit/$file`
+                if [ "X$diffrence" != "X" ];then
+                    cp /etc/audisp/$file /etc/audit/$file
+                    if [ "X`grep startup_failure_action /etc/audit/$file`" == "X" ];then
+                        # add option in new version
+                        echo "startup_failure_action = warn_once_continue" >> /etc/audit/$file
+                    fi
+                fi
+            fi
+        elif [ "$file" == "syslog.conf" ];then
+            if [ -s "/etc/audisp/plugins.d/$file" ];then
+                diffrence=`diff /etc/audisp/plugins.d/$file /etc/audit/plugins.d/$file`
+                if [ "X$diffrence" != "X" ];then
+                    cp /etc/audisp/plugins.d/syslog.conf /etc/audit/plugins.d/syslog.conf
+                    # change options "path" and "type"
+                    sed -i 's/path[ ]*=[ ]*builtin_syslog/path\ =\ \/sbin\/audisp-syslog/g' /etc/audit/plugins.d/syslog.conf
+                    sed -i 's/type[ ]*=[ ]*builtin/type\ =\ always/g' /etc/audit/plugins.d/syslog.conf
+                fi
+            fi
+        else
+            if [ -s "/etc/audisp/plugins.d/$file" ];then
+                diffrence=`diff /etc/audisp/plugins.d/$file /etc/audit/plugins.d/$file`
+                if [ "X$diffrence" != "X" ];then
+                    cp /etc/audisp/plugins.d/$file /etc/audit/plugins.d/$file
+                fi
+            fi
+        fi
+    done
+fi
+
+%post -n audispd-plugins-zos
+# after installing audispd-plugins-zos
+if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+    for file in audispd-zos-remote.conf zos-remote.conf
+    do
+        # merge custom changes to new file
+        if [ "$file" == "zos-remote.conf" ];then
+            if [ -s "/etc/audisp/$file" ];then
+                diffrence=`diff /etc/audisp/$file /etc/audit/$file`
+                if [ "X$diffrence" != "X" ];then
+                    cp /etc/audisp/$file /etc/audit/$file
+                fi
+            fi
+        elif [ "$file" == "audispd-zos-remote.conf" ];then
+            if [ -s "/etc/audisp/plugins.d/$file" ];then
+                diffrence=`diff /etc/audisp/plugins.d/$file /etc/audit/plugins.d/$file`
+                if [ "X$diffrence" != "X" ];then
+                    cp /etc/audisp/plugins.d/$file /etc/audit/plugins.d/$file
+                    # change option "args"
+                    sed -i 's/\/etc\/audisp\/zos-remote\.conf/\/etc\/audit\/zos-remote\.conf/g' /etc/audit/plugins.d/$file
+                fi
+            fi
+        fi
+    done
+fi
 
 %preun
 %systemd_preun auditd.service
@@ -169,7 +258,6 @@ fi
 %attr(755,root,root) /sbin/ausearch
 %attr(755,root,root) /sbin/aureport
 %attr(750,root,root) /sbin/autrace
-%attr(755,root,root) /sbin/audispd
 %attr(755,root,root) /sbin/augenrules
 %attr(755,root,root) %{_bindir}/aulast
 %attr(755,root,root) %{_bindir}/aulastlog
@@ -189,14 +277,11 @@ fi
 %attr(750,root,root) %dir /etc/audit
 %attr(750,root,root) %dir /etc/audit/rules.d
 %attr(750,root,root) %dir /etc/audit/plugins.d
-%attr(750,root,root) %dir /etc/audisp
-%attr(750,root,root) %dir /etc/audisp/plugins.d
 %config(noreplace) %attr(640,root,root) /etc/audit/auditd.conf
 %ghost %config(noreplace) %attr(600,root,root) /etc/audit/rules.d/audit.rules
 %ghost %config(noreplace) %attr(640,root,root) /etc/audit/audit.rules
 %config(noreplace) %attr(640,root,root) /etc/audit/audit-stop.rules
-%config(noreplace) %attr(640,root,root) /etc/audisp/audispd.conf
-%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/af_unix.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/af_unix.conf
 
 %files libs
 /%{_lib}/libaudit.so.1*
@@ -204,15 +289,16 @@ fi
 %config(noreplace) %attr(640,root,root) /etc/libaudit.conf
 
 %files -n audispd-plugins
-%config(noreplace) %attr(640,root,root) /etc/audisp/audisp-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/au-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/syslog.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/audisp-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/au-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/syslog.conf
 %attr(750,root,root) /sbin/audisp-remote
+%attr(750,root,root) /sbin/audisp-syslog
 %attr(700,root,root) %dir %{_var}/spool/audit
 
 %files -n audispd-plugins-zos
-%config(noreplace) %attr(640,root,root) /etc/audisp/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(640,root,root) /etc/audisp/zos-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/audispd-zos-remote.conf
+%config(noreplace) %attr(640,root,root) /etc/audit/zos-remote.conf
 %attr(750,root,root) /sbin/audispd-zos-remote
 
 %files devel
@@ -241,12 +327,16 @@ fi
 %files help
 %defattr(-,root,root)
 %doc ChangeLog rules init.d/auditd.cron
+%attr(644,root,root) %{_datadir}/%{name}/sample-rules/*
 %attr(644,root,root) %{_mandir}/man3/*.3.gz
 %attr(644,root,root) %{_mandir}/man5/*.5.gz
 %attr(644,root,root) %{_mandir}/man7/*.7.gz
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Tue May 25 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-1
+- update to 3.0
+
 * Mon May 24 2021 yixiangzhike <zhangxingliang3@huawei.com> - 2.8.5-4
 - fix directory permissions for /etc/audisp and /etc/audisp/plugins.d
 

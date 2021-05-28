@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            1
+Release:            2
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -19,8 +19,7 @@ BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
 BuildRequires:      golang
 %endif
 Requires:           %{name}-libs = %{epoch}:%{version}-%{release}
-Requires(pre):      pkgconf
-Requires(post):     systemd coreutils pkgconf
+Requires(post):     systemd coreutils
 Requires(preun):    systemd
 Requires(postun):   systemd coreutils
 
@@ -43,7 +42,6 @@ Summary: Plugins for audit event dispatcher
 License: GPLv2+
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
-Requires(post):  pkgconf
 
 %description -n audispd-plugins
 This package provides plugins for the real-time interface to audispd.
@@ -54,7 +52,6 @@ License: GPLv2+
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: %{name}-libs = %{epoch}:%{version}-%{release}
 Requires: openldap
-Requires(post):  pkgconf
 
 %description -n audispd-plugins-zos
 This package provides a z/OS plugin for audit event dispatcher that
@@ -142,15 +139,26 @@ make check
 rm -f rules/Makefile*
 
 %pre
-if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+if [ -d "/etc/audisp/" ];then
     # custom plugins, copy config files from /etc/audisp/plugins.d to /etc/audit/plugins.d
     # self-plugins confile files will be overwritten when installing
+    self_config_files_285=(syslog.conf au-remote.conf audispd-zos-remote.conf af_unix.conf)
     plugins_config_files=`ls /etc/audisp/plugins.d/*.conf 2>/dev/null | wc -w`
     if [ $plugins_config_files -gt 0 ];then
         if [ ! -d /etc/audit/plugins.d/ ];then
             mkdir -p /etc/audit/plugins.d/
         fi
-        cp /etc/audisp/plugins.d/*.conf /etc/audit/plugins.d/
+
+        for file in `/usr/bin/ls /etc/audisp/plugins.d/*.conf`
+        do
+            if [[ " ${self_config_files_285} " =~ " `/usr/bin/basename $file` " ]];then
+                continue
+            else
+                if [ ! -f /etc/audit/plugins.d/`/usr/bin/basename $file` ];then
+                    cp $file /etc/audit/plugins.d/
+                fi
+            fi
+        done
     fi
 fi
 
@@ -166,7 +174,7 @@ if [ "$files" -eq 0 ] ; then
 	chmod 0600 /etc/audit/rules.d/audit.rules
 fi
 # merge custom changes to new file
-if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+if [ -d "/etc/audisp/" ];then
     if [ -s "/etc/audisp/plugins.d/af_unix.conf" ];then
         diffrence=`diff /etc/audisp/plugins.d/af_unix.conf /etc/audit/plugins.d/af_unix.conf`
         if [ "X$diffrence" != "X" ];then
@@ -178,7 +186,7 @@ fi
 
 %post -n audispd-plugins
 # after installing audispd-plugins
-if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+if [ -d "/etc/audisp/" ];then
     for file in audisp-remote.conf au-remote.conf syslog.conf
     do
         # merge custom changes to new file
@@ -216,7 +224,7 @@ fi
 
 %post -n audispd-plugins-zos
 # after installing audispd-plugins-zos
-if [ -d "/etc/audisp/" -a `/usr/bin/pkgconf --modversion audit | cut -d'.' -f 1` -lt 3 ];then
+if [ -d "/etc/audisp/" ];then
     for file in audispd-zos-remote.conf zos-remote.conf
     do
         # merge custom changes to new file
@@ -334,6 +342,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Fri May 28 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-2
+- solve the script failure when package upgrade
+
 * Tue May 25 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-1
 - update to 3.0
 

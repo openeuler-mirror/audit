@@ -6,7 +6,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            3
+Release:            4
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -373,6 +373,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Thu Jul 29 2021 panxiaohe <panxiaohe@huawei.com> - 3.0-4
+- rebuild for upgrade
+
 * Fri May 28 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-3
 - solve the script failure when package upgrade
 

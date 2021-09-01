@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            2
+Release:            3
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -12,6 +12,10 @@ Patch0:          bugfix-audit-support-armv7b.patch
 Patch1:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
 Patch2:          bugfix-audit-reload-coredump.patch
 Patch3:          backport-Fix-the-default-location-for-zos-remote.conf-171.patch
+Patch4:          backport-Add-missing-call-to-free_interpretation_list.patch
+Patch5:          backport-fix-2-more-issues-found-by-fuzzing.patch
+Patch6:          backport-Fix-an-auparse-memory-leak-caused-in-recent-glibc.patch
+Patch7:          backport-Fix-double-free-with-corrupted-logs.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -342,6 +346,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Wed Sep 1 2021 steven.ygui <steven_ygui@163.com> - 3.0-3
+- backport some patches to fix memory leak and double free issues
+
 * Fri May 28 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-2
 - solve the script failure when package upgrade
 

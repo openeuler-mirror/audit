@@ -1,0 +1,47 @@
+From fd76e380ea117000d9d350405e2cfbd070c5c01a Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Sat, 21 Aug 2021 10:18:30 -0400
+Subject: [PATCH 2213/2246] Check ctime return code
+
+---
+ tools/aulast/aulast.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/tools/aulast/aulast.c b/tools/aulast/aulast.c
+index c513aac..8a25f3b 100644
+--- a/tools/aulast/aulast.c
++++ b/tools/aulast/aulast.c
+@@ -96,8 +96,11 @@ static void report_session(lnode* cur)
+ 			int mins, hours, days;
+ 			if (notime)
+ 				printf("- %-7.5s", " ");
+-			else
+-				printf("- %-7.5s", ctime(&cur->end) + 11);
++			else {
++				char *ttime = ctime(&cur->end);
++				printf("- %-7.5s", ttime ? ttime + 11 :
++				       "bad value");
++			}
+ 			secs = cur->end - cur->start;
+ 			mins  = (secs / 60) % 60;
+ 			hours = (secs / 3600) % 24;
+@@ -128,10 +131,13 @@ static void report_session(lnode* cur)
+ 		strftime(start, sizeof(start), "%x %T", btm);
+ 		if (cur->end != 0) {
+ 			btm = localtime(&cur->end);
+-			strftime(end, sizeof(end), "%x %T", btm);
+-		      printf("    ausearch --start %s --end %s",
+-				start, end);
++			if (btm) {
++				strftime(end, sizeof(end), "%x %T", btm);
++				printf("    ausearch --start %s --end %s",
++					start, end);
++			} else goto no_end;
+ 		} else {
++no_end:
+ 		    printf("    ausearch --start %s", start);
+ 		}
+ 		if (cur->name == NULL)
+-- 
+1.8.3.1
+

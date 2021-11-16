@@ -1,0 +1,64 @@
+From 39f868fef95f95786358bc3690a327d4f11d2d43 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Thu, 3 Jun 2021 16:18:36 -0400
+Subject: [PATCH 2084/2246] Fix some string length issues
+
+In interpret, fix the size so that we need to size it again later if new
+strings get added. The ausearch/report issues have the size information
+available, so FORTIFY_SOURCE should keep things in check.
+---
+ auparse/interpret.c | 2 +-
+ src/aureport.c      | 4 ++--
+ src/ausearch.c      | 4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/auparse/interpret.c b/auparse/interpret.c
+index e22cae7..5d6f31a 100644
+--- a/auparse/interpret.c
++++ b/auparse/interpret.c
+@@ -1242,7 +1242,7 @@ static const char *print_flags(const char *val)
+ {
+         int flags, cnt = 0;
+ 	size_t i;
+-	char *out, buf[80];
++	char *out, buf[sizeof(flag_strings)];
+ 
+         errno = 0;
+         flags = strtoul(val, NULL, 16);
+diff --git a/src/aureport.c b/src/aureport.c
+index d0251a4..22618f0 100644
+--- a/src/aureport.c
++++ b/src/aureport.c
+@@ -168,10 +168,10 @@ static int process_logs(void)
+ 	int num = 0;
+ 
+ 	if (user_file && userfile_is_dir) {
+-		char dirname[MAXPATHLEN];
++		char dirname[MAXPATHLEN+1];
+ 		clear_config (&config);
+ 
+-		strcpy(dirname, user_file);
++		strncpy(dirname, user_file, MAXPATHLEN-32);
+ 		if (dirname[strlen(dirname)-1] != '/')
+ 			strcat(dirname, "/");
+ 		strcat (dirname, "audit.log");
+diff --git a/src/ausearch.c b/src/ausearch.c
+index 97f89bf..768807e 100644
+--- a/src/ausearch.c
++++ b/src/ausearch.c
+@@ -228,10 +228,10 @@ static int process_logs(void)
+ 	int ret;
+ 
+ 	if (user_file && userfile_is_dir) {
+-		char dirname[MAXPATHLEN];
++		char dirname[MAXPATHLEN+1];
+ 		clear_config (&config);
+ 
+-		strcpy(dirname, user_file);
++		strncpy(dirname, user_file, MAXPATHLEN-32);
+ 		if (dirname[strlen(dirname)-1] != '/')
+ 				strcat(dirname, "/");
+ 		strcat (dirname, "audit.log");
+-- 
+1.8.3.1
+

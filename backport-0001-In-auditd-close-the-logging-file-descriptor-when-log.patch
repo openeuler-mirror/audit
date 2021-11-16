@@ -1,0 +1,32 @@
+From d62c38a55520e58220d8e42497c4ab343185106f Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Thu, 28 Oct 2021 13:22:24 -0400
+Subject: [PATCH 2237/2246] In auditd, close the logging file descriptor when
+ logging is suspended
+
+---
+ src/auditd-event.c | 8 ++++++++
+ 1 files changed, 8 insertions(+)
+
+diff --git a/src/auditd-event.c b/src/auditd-event.c
+index f886b67..4dee990 100644
+--- a/src/auditd-event.c
++++ b/src/auditd-event.c
+@@ -723,6 +723,14 @@ static void check_log_file_size(void)
+ 			case SZ_SUSPEND:
+ 				audit_msg(LOG_ERR,
+ 		    "Audit daemon is suspending logging due to logfile size.");
++				// We need to close the file so that manual
++				// intervention can move or delete the file.
++				// We don't want to keep logging to a deleted
++				// file.
++				if (log_file)
++					fclose(log_file);
++				log_file = NULL;
++				log_fd = -1;
+ 				logging_suspended = 1;
+ 				break;
+ 			case SZ_ROTATE:
+-- 
+1.8.3.1
+

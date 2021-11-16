@@ -1,0 +1,46 @@
+From f4683d04eadb7d76b98497af834f027d6005d893 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Mon, 9 Aug 2021 17:14:17 -0400
+Subject: [PATCH] fix 2 more issues found by fuzzing
+
+---
+ auparse/auparse.c | 8 +++++++-
+ auparse/ellist.c  | 4 +++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/auparse/auparse.c b/auparse/auparse.c
+index b0e685a..3cf512a 100644
+--- a/auparse/auparse.c
++++ b/auparse/auparse.c
+@@ -1611,7 +1611,13 @@ static int au_auparse_next_event(auparse_state_t *au)
+ 		}
+ 		aup_list_create(l);
+ 		aup_list_set_event(l, &e);
+-		aup_list_append(l, au->cur_buf, au->list_idx, au->line_number);
++		if (aup_list_append(l, au->cur_buf, au->list_idx,
++				    au->line_number) < 0) {
++			au->cur_buf = NULL;
++			aup_list_clear(l);
++			free(l);
++			continue;
++		}
+ 		// Eat standalone EOE - main event was already marked complete
+ 		if (l->head->type == AUDIT_EOE) {
+ 			au->cur_buf = NULL;
+diff --git a/auparse/ellist.c b/auparse/ellist.c
+index 7d9c552..dd711bc 100644
+--- a/auparse/ellist.c
++++ b/auparse/ellist.c
+@@ -290,7 +290,9 @@ static int parse_up_record(rnode* r)
+ 					while (ptr && *ptr != '}') {
+ 						len = strlen(ptr);
+ 						if ((len+1) >= (256-total)) {
+-							free(buf);
++						   if (nvlist_get_cnt(&r->nv)
++									 == 0)
++								free(buf);
+ 							return -1;
+ 						}
+ 						if (tmpctx[0]) {
+-- 
+

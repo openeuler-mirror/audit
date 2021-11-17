@@ -1,0 +1,26 @@
+From 2b34fea50a9f6a65dd51a2b7abf67e6f19c8d1f5 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Sat, 7 Aug 2021 13:51:30 -0400
+Subject: [PATCH 2199/2246] Fix busy loop in normalizer when logs are corrupt
+
+---
+ auparse/normalize.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/auparse/normalize.c b/auparse/normalize.c
+index 99f9803..cd0a7c2 100644
+--- a/auparse/normalize.c
++++ b/auparse/normalize.c
+@@ -348,7 +348,8 @@ static void collect_id_obj2(auparse_state_t *au, const char *syscall)
+ 				if (cnt < limit) {
+ 					auparse_next_field(au);
+ 					cnt++;
+-				}
++				} else
++					break;
+ 			} else
+ 				break;
+ 		}
+-- 
+1.8.3.1
+

@@ -1,0 +1,36 @@
+From 0177e03f0809da0007f09504b789eba4b8cbe739 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Fri, 6 Aug 2021 17:03:41 -0400
+Subject: [PATCH] Fix double free with corrupted logs
+
+---
+ src/ausearch-parse.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/ausearch-parse.c b/src/ausearch-parse.c
+index 9ee4a4f..cb7d481 100644
+--- a/src/ausearch-parse.c
++++ b/src/ausearch-parse.c
+@@ -420,8 +420,10 @@ try_again:
+ 		str = strstr(term, "comm=");
+ 		if (str) {
+ 			/* Make the syscall one override */
+-			if (s->comm)
++			if (s->comm) {
+ 				free(s->comm);
++				s->comm = NULL;
++			}
+ 			str += 5;
+ 			if (*str == '"') {
+ 				str++;
+@@ -431,7 +433,7 @@ try_again:
+ 				*term = 0;
+ 				s->comm = strdup(str);
+ 				*term = '"';
+-			} else 
++			} else
+ 				s->comm = unescape(str);
+ 		} else
+ 			return 38;
+-- 
+

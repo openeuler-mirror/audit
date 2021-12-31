@@ -85,8 +85,8 @@ index cb29fee..3655726 100644
 -		int rc;
 +		int rc, rtype;
  		size_t mlen, len;
-		auparse_state_t *au;
  		char *message;
+ 		// Do raw format to get event started
 @@ -427,6 +428,17 @@ static const char *format_enrich(const struct audit_reply *rep)
  
  		// Loop over all fields while possible to add field
@@ -120,9 +120,9 @@ index cb29fee..3655726 100644
 +			default:
 +				break;
 +		}
- 		auparse_destroy_ext(au, AUPARSE_DESTROY_COMMON);
  		free(message);
  	}
+         return format_buf;
 -- 
 1.8.3.1
 

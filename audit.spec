@@ -1,8 +1,8 @@
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
-Version:            3.0
-Release:            4
+Version:            3.0.1
+Release:            1
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -16,23 +16,22 @@ Patch4:          backport-Add-missing-call-to-free_interpretation_list.patch
 Patch5:          backport-fix-2-more-issues-found-by-fuzzing.patch
 Patch6:          backport-Fix-an-auparse-memory-leak-caused-in-recent-glibc.patch
 Patch7:          backport-Fix-double-free-with-corrupted-logs.patch
-Patch8:          backport-Turn-libaucommon-into-a-libtool-convenience-library-.patch
-Patch9:          backport-Fix-the-closing-timing-of-audit_fd-166.patch
-Patch10:         backport-Fix-some-string-length-issues.patch
-Patch11:         backport-Move-the-free_config-to-success-path.patch
-Patch12:         backport-Check-for-fuzzer-induced-invalid-value.patch
-Patch13:         backport-error-out-if-log-is-mangled.patch
-Patch14:         backport-Dont-run-off-the-end-with-corrupt-logs.patch
-Patch15:         backport-Another-hardening-measure-for-corrupted-logs.patch
-Patch16:         backport-Fix-busy-loop-in-normalizer-when-logs-are-corrupt.patch
-Patch17:         backport-Better-fix-for-busy-loop-in-normalizer-when-logs-are.patch
-Patch18:         backport-flush-uid-gid-caches-when-user-group-added-deleted-m.patch
-Patch19:         backport-In-auditd-check-if-log_file-is-valid-before-closing-.patch
-Patch20:         backport-Check-ctime-return-code.patch
-Patch21:         backport-When-interpreting-if-val-is-NULL-return-an-empty-str.patch
-Patch22:         backport-auditd.service-Restart-on-failure-ignoring-some-exit.patch
-Patch23:         backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
-Patch24:         backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
+Patch8:          backport-Fix-the-closing-timing-of-audit_fd-166.patch
+Patch9:          backport-Fix-some-string-length-issues.patch
+Patch10:         backport-Move-the-free_config-to-success-path.patch
+Patch11:         backport-Check-for-fuzzer-induced-invalid-value.patch
+Patch12:         backport-error-out-if-log-is-mangled.patch
+Patch13:         backport-Dont-run-off-the-end-with-corrupt-logs.patch
+Patch14:         backport-Another-hardening-measure-for-corrupted-logs.patch
+Patch15:         backport-Fix-busy-loop-in-normalizer-when-logs-are-corrupt.patch
+Patch16:         backport-Better-fix-for-busy-loop-in-normalizer-when-logs-are.patch
+Patch17:         backport-flush-uid-gid-caches-when-user-group-added-deleted-m.patch
+Patch18:         backport-In-auditd-check-if-log_file-is-valid-before-closing-.patch
+Patch19:         backport-Check-ctime-return-code.patch
+Patch20:         backport-When-interpreting-if-val-is-NULL-return-an-empty-str.patch
+Patch21:         backport-auditd.service-Restart-on-failure-ignoring-some-exit.patch
+Patch22:         backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
+Patch23:         backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -144,7 +143,7 @@ cd $curdir
 rm -f $RPM_BUILD_ROOT/%{_lib}/libaudit.so
 rm -f $RPM_BUILD_ROOT/%{_lib}/libauparse.so
 
-find $RPM_BUILD_ROOT/%{_libdir}/python?.?/site-packages -name '*.a' -delete
+find $RPM_BUILD_ROOT/%{_libdir}/python%{python3_version}/site-packages -name '*.a' -delete
 
 mv $RPM_BUILD_ROOT/%{_lib}/pkgconfig $RPM_BUILD_ROOT%{_libdir}
 
@@ -363,6 +362,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Fri Dec 31 2021 yixiangzhike <yixiangzhike007@163.com> - 3.0.1-1
+- update to 3.0.1
+
 * Tue Nov 16 2021 yixiangzhike <yixiangzhike007@163.com> - 3.0-4
 - backport some patches 
    Turn libaucommon into a libtool convenience library

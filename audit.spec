@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            3
+Release:            4
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -270,7 +270,14 @@ if [ -d "/etc/audisp/" ];then
 fi
 
 %preun
-%systemd_preun auditd.service
+if [ $1 -eq 0 ] && [ -x /usr/bin/systemctl ]; then 
+        # Package removal, not upgrade 
+        /usr/bin/systemctl --no-reload disable auditd.service || : 
+fi
+if [ $1 -eq 0 ]; then
+        # Package removal, not upgrade 
+        /sbin/service auditd stop > /dev/null 2>&1
+fi
 
 %postun
 /sbin/ldconfig
@@ -363,6 +370,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Sat Feb 12 2022 yixiangzhike <yixiangzhike007@163.com> - 3.0-4
+- Fix failure of stopping auditd before uninstalling
+
 * Tue Nov 16 2021 yixiangzhike <zhangxingliang3@huawei.com> - 3.0-3
 - backport some patches
    Add missing call to free_interpretation_list

@@ -1,0 +1,113 @@
+From df547703bb90026dcff152e64bc55503ad26d815 Mon Sep 17 00:00:00 2001
+From: wuzx <wuzx1226@qq.com>
+Date: Fri, 18 Nov 2022 13:19:49 +0800
+Subject: [PATCH] Add sw64 architecture
+
+Add sw64 architecture in file bindings/swig/python/audit.py config.guess config.sub lib/libaudit.h src/libev/ev.c and tools/ausyscall/ausyscall.c to support sw64 architecture.
+
+Signed-off-by: wuzx <wuzx1226@qq.com>
+---
+ bindings/swig/python/audit.py | 1 +
+ config.guess                  | 8 ++++++++
+ config.sub                    | 1 +
+ lib/libaudit.h                | 1 +
+ src/libev/ev.c                | 3 +++
+ tools/ausyscall/ausyscall.c   | 6 ++++++
+ 6 files changed, 20 insertions(+)
+
+diff --git a/bindings/swig/python/audit.py b/bindings/swig/python/audit.py
+index 69631a7..14fa89b 100644
+--- a/bindings/swig/python/audit.py
++++ b/bindings/swig/python/audit.py
+@@ -607,6 +607,7 @@ MACH_PPC = _audit.MACH_PPC
+ MACH_S390X = _audit.MACH_S390X
+ MACH_S390 = _audit.MACH_S390
+ MACH_ALPHA = _audit.MACH_ALPHA
++MACH_SW_64 = _audit.MACH_SW_64
+ MACH_ARM = _audit.MACH_ARM
+ MACH_AARCH64 = _audit.MACH_AARCH64
+ MACH_PPC64LE = _audit.MACH_PPC64LE
+diff --git a/config.guess b/config.guess
+index b33c9e8..69e3005 100755
+--- a/config.guess
++++ b/config.guess
+@@ -913,6 +913,14 @@ EOF
+ 	UNAME_MACHINE=aarch64_be
+ 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
+ 	exit ;;
++    sw_64:Linux:*:*)
++	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
++	  sw)   UNAME_MACHINE=sw_64 ;;
++	esac
++	objdump --private-headers /bin/sh | grep -q ld.so.1
++	if test "$?" = 0 ; then LIBC=gnulibc1 ; fi
++	echo "$UNAME_MACHINE"-sunway-linux-"$LIBC"
++	exit ;;
+     alpha:Linux:*:*)
+ 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+ 	  EV5)   UNAME_MACHINE=alphaev5 ;;
+diff --git a/config.sub b/config.sub
+index b51fb8c..76babe9 100755
+--- a/config.sub
++++ b/config.sub
+@@ -1157,6 +1157,7 @@ case $cpu-$vendor in
+ 			| a29k \
+ 			| aarch64 | aarch64_be \
+ 			| abacus \
++			| sw_64 \
+ 			| alpha | alphaev[4-8] | alphaev56 | alphaev6[78] \
+ 			| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] \
+ 			| alphapca5[67] | alpha64pca5[67] \
+diff --git a/lib/libaudit.h b/lib/libaudit.h
+index 3a8e8c8..16af222 100644
+--- a/lib/libaudit.h
++++ b/lib/libaudit.h
+@@ -561,6 +561,7 @@ typedef enum {
+ 	MACH_S390X,
+ 	MACH_S390,
+ 	MACH_ALPHA,	// Deprecated but has to stay
++	MACH_SW_64,	// Deprecated but has to stay
+ 	MACH_ARM,
+ 	MACH_AARCH64,
+ 	MACH_PPC64LE
+diff --git a/src/libev/ev.c b/src/libev/ev.c
+index 5ff936c..72765b5 100644
+--- a/src/libev/ev.c
++++ b/src/libev/ev.c
+@@ -828,6 +828,8 @@ struct signalfd_siginfo
+       #define ECB_MEMORY_FENCE         __asm__ __volatile__ (".set mips2; sync; .set mips0" : : : "memory")
+     #elif defined __alpha__
+       #define ECB_MEMORY_FENCE         __asm__ __volatile__ ("mb"       : : : "memory")
++    #elif defined __sw_64__
++      #define ECB_MEMORY_FENCE         __asm__ __volatile__ ("memb"       : : : "memory")
+     #elif defined __hppa__
+       #define ECB_MEMORY_FENCE         __asm__ __volatile__ (""         : : : "memory")
+       #define ECB_MEMORY_FENCE_RELEASE __asm__ __volatile__ ("")
+@@ -1550,6 +1552,7 @@ ecb_binary32_to_binary16 (uint32_t x)
+     || defined __s390__ || defined __s390x__ \
+     || defined __mips__ \
+     || defined __alpha__ \
++    || defined __sw_64__ \
+     || defined __hppa__ \
+     || defined __ia64__ \
+     || defined __m68k__ \
+diff --git a/tools/ausyscall/ausyscall.c b/tools/ausyscall/ausyscall.c
+index 4fb8f09..206e9ff 100644
+--- a/tools/ausyscall/ausyscall.c
++++ b/tools/ausyscall/ausyscall.c
+@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
+ 		} else if (strcmp("ia64", argv[i]) == 0) {
+ 			fputs("IA64 processor support is deprecated\n",
+ 					stderr);
++#ifndef WITH_SW_64
++		} else if (strcmp("sw_64", argv[i]) == 0) {
++			fputs("Sw_64 eabi processor support is not enabled\n",
++					stderr);
++			exit(1);
++#endif
+ #ifndef WITH_ARM
+ 		} else if (strcmp("arm", argv[i]) == 0) {
+ 			fputs("Arm eabi processor support is not enabled\n",
+-- 
+2.33.0
+

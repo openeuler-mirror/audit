@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0.1
-Release:            3
+Release:            4
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -154,9 +154,7 @@ touch -r ./audit.spec $RPM_BUILD_ROOT/usr/share/man/man5/libaudit.conf.5.gz
 %delete_la
 
 %check
-%ifarch %{golang_arches}
 make check
-%endif
 rm -f rules/Makefile*
 
 %pre
@@ -370,6 +368,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Wed Nov 23 2022 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0.1-4
+- del golang_arches for check
+
 * Tue Oct 18 2022 wuzx<wuzx1226@qq.com> - 3.0.1-3
 - add sw64 patch
 

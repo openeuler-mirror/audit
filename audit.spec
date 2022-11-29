@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0.1
-Release:            4
+Release:            5
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -32,6 +32,7 @@ Patch20:         backport-When-interpreting-if-val-is-NULL-return-an-empty-str.p
 Patch21:         backport-auditd.service-Restart-on-failure-ignoring-some-exit.patch
 Patch22:         backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
 Patch23:         backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
+Patch24:         audit-Add-sw64-architecture.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -369,6 +370,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Mon Nov 14 2022 wuzx<wuzx1226@qq.com> - 3.0.1-5
+- Add sw64 architecture
+
 * Fri Oct 21 2022 zhangguangzhi <zhangguangzhi3@huawei.com> - 3.0.1-4
 - change release
 

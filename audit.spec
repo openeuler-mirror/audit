@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0.1
-Release:            5
+Release:            6
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -108,9 +108,9 @@ libauparse can be used by python3.
 %prep
 %autosetup -n %{name}-%{version} -p1
 cp %{SOURCE1} .
-autoreconf -f -i
 
 %build
+autoreconf -f -i
 %configure --sbindir=/sbin --libdir=/%{_lib} --with-python=no \
            --with-python3=yes \
            --enable-gssapi-krb5=yes --with-arm --with-aarch64 \
@@ -370,6 +370,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Sat Dec 17 2022 fangxiuning <fangxiuning@huawei.com> - 3.0.1-6
+- Move autoreconf to build
+
 * Mon Nov 14 2022 wuzx<wuzx1226@qq.com> - 3.0.1-5
 - Add sw64 architecture
 

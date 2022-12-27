@@ -1,0 +1,25 @@
+From 5023b59ac710a25fe30e689aaf0af38a4b7ea3f1 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Mon, 11 Jul 2022 17:03:45 -0400
+Subject: time_t is not an int anymore
+
+---
+ tools/aulast/aulast.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/aulast/aulast.c b/tools/aulast/aulast.c
+index 8a25f3b..cf9be60 100644
+--- a/tools/aulast/aulast.c
++++ b/tools/aulast/aulast.c
+@@ -408,7 +408,7 @@ static void update_session_logout(auparse_state_t *au)
+ static void process_bootup(auparse_state_t *au)
+ {
+ 	lnode *cur;
+-	int start;
++	time_t start;
+ 
+ 	// See if we have unclosed boot up and make into CRASH record
+ 	list_first(&l);
+-- 
+2.27.0
+

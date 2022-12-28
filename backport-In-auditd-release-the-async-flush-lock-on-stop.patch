@@ -1,0 +1,29 @@
+From f7df667ba76391ffd65a4ed45b2150bf9902b99d Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Wed, 30 Mar 2022 10:12:16 -0400
+Subject: In auditd, release the async flush lock on stop
+
+Conflict:delete changelog
+---
+ src/auditd-event.c | 4 +++-
+ 1 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/auditd-event.c b/src/auditd-event.c
+index e88ef6e..ed6e929 100644
+--- a/src/auditd-event.c
++++ b/src/auditd-event.c
+@@ -208,8 +208,10 @@ static void *flush_thread_main(void *arg)
+ 		// into a loop of fsyncs.
+ 		while (flush == 0) {
+ 			pthread_cond_wait(&do_flush, &flush_lock);
+-			if (stop)
++			if (stop) {
++				pthread_mutex_unlock(&flush_lock);
+ 				return NULL;
++			}
+ 		}
+ 		flush = 0;
+ 		pthread_mutex_unlock(&flush_lock);
+-- 
+2.27.0
+

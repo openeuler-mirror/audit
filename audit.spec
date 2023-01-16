@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0.1
-Release:            4
+Release:            5
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -33,6 +33,9 @@ Patch21:         backport-auditd.service-Restart-on-failure-ignoring-some-exit.p
 Patch22:         backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
 Patch23:         backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
 Patch24:         audit-Add-sw64-architecture.patch
+Patch25:         backport-Make-IPX-packet-interpretation-dependent-on-the-ipx-.patch
+Patch26:         backport-audit-flex-array-workaround.patch
+Patch27:         backport-audit-undo-flex-array.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -106,8 +109,36 @@ libauparse can be used by python3.
 %package_help
 
 %prep
-%autosetup -n %{name}-%{version} -p1
+%setup -n %{name}-%{version} -q
 cp %{SOURCE1} .
+cp /usr/include/linux/audit.h lib/
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch19 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch25 -p1
+%patch26 -p1
 autoreconf -f -i
 
 %build
@@ -150,6 +181,11 @@ mv $RPM_BUILD_ROOT/%{_lib}/pkgconfig $RPM_BUILD_ROOT%{_libdir}
 
 touch -r ./audit.spec $RPM_BUILD_ROOT/etc/libaudit.conf
 touch -r ./audit.spec $RPM_BUILD_ROOT/usr/share/man/man5/libaudit.conf.5.gz
+
+cur=`pwd`
+cd $RPM_BUILD_ROOT
+patch -p1 < %{PATCH27}
+cd $cur
 
 %delete_la
 
@@ -368,6 +404,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Mon Jan 16 2023 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0.1-5
+- backport patch adapt to kernel 6.1
+
 * Wed Nov 23 2022 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0.1-4
 - del golang_arches for check
 

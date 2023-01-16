@@ -1,0 +1,47 @@
+commit 0d31f225faef8da3fcd0f69f6544aa274102fe53
+Author: Steve Grubb <sgrubb@redhat.com>
+Date:   Wed Feb 23 14:24:50 2022 -0500
+Subject: workaround a kernel change that breaks the build
+
+---
+ bindings/swig/src.auditswig.i | 2 +-
+ lib/audit.h                   | 2 +-
+ lib/libaudit.h                | 2 +-
+ 3 files changed, 3 insertions(+)m 3 deletions(-)
+
+diff --git a/bindings/swig/src/auditswig.i b/bindings/swig/src/auditswig.i
+--- a/bindings/swig/src/auditswig.i
++++ b/bindings/swig/src/auditswig.i
+@@ -39,7 +39,7 @@ signed
+ #define __attribute(X) /*nothing*/
+ typedef unsigned __u32;
+ typedef unsigned uid_t;
+-%include "/usr/include/linux/audit.h"
++%include "../lib/audit.h"
+ #define __extension__ /*nothing*/
+ %include <stdint.i>
+ %include "../lib/libaudit.h"
+diff --git a/lib/audit.h b/lib/audit.h
+--- a/lib/audit.h
++++ b/lib/audit.h
+@@ -514,7 +514,7 @@ struct audit_rule_data {
+ 	__u32		values[AUDIT_MAX_FIELDS];
+ 	__u32		fieldflags[AUDIT_MAX_FIELDS];
+ 	__u32		buflen;	/* total length of string fields */
+-	char		buf[];	/* string fields buffer */
++	char		buf[0];	/* string fields buffer */
+ };
+ 
+ #endif /* _LINUX_AUDIT_H_ */
+diff --git a/lib/libaudit.h b/lib/libaudit.h
+--- a/lib/libaudit.h
++++ b/lib/libaudit.h
+@@ -32,7 +32,7 @@
+ #include <stdint.h>
+ #include <sys/socket.h>
+ #include <linux/netlink.h>
+-#include <linux/audit.h>
++#include "audit.h"
+ #include <stdarg.h>
+ #include <syslog.h>
+

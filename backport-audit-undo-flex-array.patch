@@ -1,0 +1,21 @@
+commit 2df0fecef9ea2225de116c1e969462cb4846241d
+Author: Steve Grubb <sgrubb@redhat.com>
+Date:   Thu Feb 24 09:11:06 2022 -0500
+Subject:  Undo fix to libaudit.h before installing
+
+---
+ ./usr/include/libaudit.h | 2 +-
+ 1 flies changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/./usr/include/libaudit.h b/.user/include/libaudit.h
+--- a/./usr/include/libaudit.h
++++ b/./usr/include/libaudit.h
+@@ -32,7 +32,7 @@
+ #include <stdint.h>
+ #include <sys/socket.h>
+ #include <linux/netlink.h>
+-#include "audit.h"
++#include <linux/audit.h>
+ #include <stdarg.h>
+ #include <syslog.h>
+ 

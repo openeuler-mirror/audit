@@ -1,8 +1,8 @@
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
-Version:            3.0.1
-Release:            5
+Version:            3.0.9
+Release:            1
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -11,31 +11,9 @@ Source1:            https://www.gnu.org/licenses/lgpl-2.1.txt
 Patch0:          bugfix-audit-support-armv7b.patch
 Patch1:          bugfix-audit-userspace-missing-syscalls-for-aarm64.patch
 Patch2:          bugfix-audit-reload-coredump.patch
-Patch3:          backport-Fix-the-default-location-for-zos-remote.conf-171.patch
-Patch4:          backport-Add-missing-call-to-free_interpretation_list.patch
-Patch5:          backport-fix-2-more-issues-found-by-fuzzing.patch
-Patch6:          backport-Fix-an-auparse-memory-leak-caused-in-recent-glibc.patch
-Patch7:          backport-Fix-double-free-with-corrupted-logs.patch
-Patch8:          backport-Fix-the-closing-timing-of-audit_fd-166.patch
-Patch9:          backport-Fix-some-string-length-issues.patch
-Patch10:         backport-Move-the-free_config-to-success-path.patch
-Patch11:         backport-Check-for-fuzzer-induced-invalid-value.patch
-Patch12:         backport-error-out-if-log-is-mangled.patch
-Patch13:         backport-Dont-run-off-the-end-with-corrupt-logs.patch
-Patch14:         backport-Another-hardening-measure-for-corrupted-logs.patch
-Patch15:         backport-Fix-busy-loop-in-normalizer-when-logs-are-corrupt.patch
-Patch16:         backport-Better-fix-for-busy-loop-in-normalizer-when-logs-are.patch
-Patch17:         backport-flush-uid-gid-caches-when-user-group-added-deleted-m.patch
-Patch18:         backport-In-auditd-check-if-log_file-is-valid-before-closing-.patch
-Patch19:         backport-Check-ctime-return-code.patch
-Patch20:         backport-When-interpreting-if-val-is-NULL-return-an-empty-str.patch
-Patch21:         backport-auditd.service-Restart-on-failure-ignoring-some-exit.patch
-Patch22:         backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
-Patch23:         backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
-Patch24:         audit-Add-sw64-architecture.patch
-Patch25:         backport-Make-IPX-packet-interpretation-dependent-on-the-ipx-.patch
-Patch26:         backport-audit-flex-array-workaround.patch
-Patch27:         backport-audit-undo-flex-array.patch
+Patch3:          audit-Add-sw64-architecture.patch
+Patch4:          backport-audit-flex-array-workaround.patch
+Patch5:          backport-audit-undo-flex-array.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -117,28 +95,6 @@ cp /usr/include/linux/audit.h lib/
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
-%patch18 -p1
-%patch19 -p1
-%patch20 -p1
-%patch21 -p1
-%patch22 -p1
-%patch23 -p1
-%patch24 -p1
-%patch25 -p1
-%patch26 -p1
 autoreconf -f -i
 
 %build
@@ -184,7 +140,8 @@ touch -r ./audit.spec $RPM_BUILD_ROOT/usr/share/man/man5/libaudit.conf.5.gz
 
 cur=`pwd`
 cd $RPM_BUILD_ROOT
-patch -p1 < %{PATCH27}
+patch -p1 < %{PATCH5}
+find . -name '*.orig' -delete
 cd $cur
 
 %delete_la
@@ -342,6 +299,7 @@ fi
 %attr(750,root,root) %{_libexecdir}/initscripts/legacy-actions/auditd/rotate
 %attr(750,root,root) %{_libexecdir}/initscripts/legacy-actions/auditd/state
 %attr(750,root,root) %{_libexecdir}/initscripts/legacy-actions/auditd/stop
+%attr(750,root,root) %{_libexecdir}/audit-functions
 %ghost %{_localstatedir}/run/auditd.state
 %attr(750,root,root) %dir %{_var}/log/audit
 %attr(750,root,root) %dir /etc/audit
@@ -404,6 +362,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Thu Feb 2 2023 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0.9-1
+- update version to 3.0.9
+
 * Mon Jan 16 2023 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0.1-5
 - backport patch adapt to kernel 6.1
 

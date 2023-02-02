@@ -8,17 +8,18 @@ reason: reconsitution userspace audit missing syscalls for aarm64
 
 Signed-off-by: jinbo <jinbo8@huawei.com>
 ---
- lib/aarch64_table.h | 43 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+ lib/aarch64_table.h | 44 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 43 insertions(+), 1 deletion(-)
 
 diff --git a/lib/aarch64_table.h b/lib/aarch64_table.h
 index c61aa91..ea634c1 100644
 --- a/lib/aarch64_table.h
 +++ b/lib/aarch64_table.h
-@@ -311,3 +311,46 @@ _S(438, "pidfd_getfd")
- _S(439, "faccessat2")
- _S(440, "process_madvise")
- _S(441, "epoll_pwait2")
+@@ -326,4 +326,46 @@ _S(447, "memfd_secret")
+ _S(448, "process_mrelease")
+ _S(449, "futex_waitv")
+ _S(450, "set_mempolicy_home_node")
+-
 +_S(1024, "open")
 +_S(1025, "link")
 +_S(1026, "unlink")

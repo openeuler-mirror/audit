@@ -31,20 +31,20 @@ diff --git a/config.guess b/config.guess
 index b33c9e8..69e3005 100755
 --- a/config.guess
 +++ b/config.guess
-@@ -913,6 +913,14 @@ EOF
+@@ -976,6 +976,14 @@ EOF
  	UNAME_MACHINE=aarch64_be
- 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
- 	exit ;;
+ 	GUESS=$UNAME_MACHINE-unknown-linux-$LIBC
+ 	;;
 +    sw_64:Linux:*:*)
-+	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
-+	  sw)   UNAME_MACHINE=sw_64 ;;
-+	esac
-+	objdump --private-headers /bin/sh | grep -q ld.so.1
-+	if test "$?" = 0 ; then LIBC=gnulibc1 ; fi
-+	echo "$UNAME_MACHINE"-sunway-linux-"$LIBC"
-+	exit ;;
++       case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' /proc/cpuinfo 2>/dev/null` in
++         sw)   UNAME_MACHINE=sw_64 ;;
++       esac
++       objdump --private-headers /bin/sh | grep -q ld.so.1
++       if test "$?" = 0 ; then LIBC=gnulibc1 ; fi
++       GUESS=$UNAME_MACHINE-sunway-linux-$LIBC
++       ;;
      alpha:Linux:*:*)
- 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+ 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' /proc/cpuinfo 2>/dev/null` in
  	  EV5)   UNAME_MACHINE=alphaev5 ;;
 diff --git a/config.sub b/config.sub
 index b51fb8c..76babe9 100755

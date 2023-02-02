@@ -5,11 +5,11 @@ Subject: [PATCH] bugfix-audit-reload-coredump
 
 ---
  src/auditd-reconfig.c |  2 ++
- src/auditd.c          | 36 +++++++++++++++++++++++++++++-------
- 2 files changed, 31 insertions(+), 7 deletions(-)
+ src/auditd.c          | 26 ++++++++++++++++++++++++--
+ 2 files changed, 26 insertions(+), 2 deletions(-)
 
 diff --git a/src/auditd-reconfig.c b/src/auditd-reconfig.c
-index f5b00e6..5ea9126 100644
+index 37e0adc..66ded38 100644
 --- a/src/auditd-reconfig.c
 +++ b/src/auditd-reconfig.c
 @@ -35,6 +35,7 @@
@@ -29,7 +29,7 @@ index f5b00e6..5ea9126 100644
  
  	pthread_mutex_unlock(&config_lock);
 diff --git a/src/auditd.c b/src/auditd.c
-index fa783a2..0d76e0c 100644
+index 5933703..53f4803 100644
 --- a/src/auditd.c
 +++ b/src/auditd.c
 @@ -76,6 +76,7 @@ static int hup_info_requested = 0;
@@ -40,45 +40,33 @@ index fa783a2..0d76e0c 100644
  
  /* Local function prototypes */
  int send_audit_event(int type, const char *str);
-@@ -519,15 +520,30 @@ static void netlink_handler(struct ev_loop *loop, struct ev_io *io,
- 				char hup[MAX_AUDIT_MESSAGE_LENGTH];
- 				audit_msg(LOG_DEBUG,
+@@ -525,8 +526,23 @@ static void netlink_handler(struct ev_loop *loop, struct ev_io *io,
+ 					char hup[MAX_AUDIT_MESSAGE_LENGTH];
+ 					audit_msg(LOG_DEBUG,
  				    "HUP detected, starting config manager");
--				reconfig_ev = cur_event;
--				if (start_config_manager(cur_event)) {
-+				if(hup_flag == 0)
-+				{
-+					hup_flag = 1;
-+					reconfig_ev = cur_event;
-+					if (start_config_manager(cur_event)) {
-+						audit_format_signal_info(hup,
-+								 	sizeof(hup),
-+						 	"reconfigure state=no-change",
-+							 	&cur_event->reply,
-+								 	"failed");
-+						send_audit_event(AUDIT_DAEMON_CONFIG,
-+							 	hup);
-+						hup_flag = 0;
+-					reconfig_ev = cur_event;
+-					if (start_config_manager(cur_event)) {
++					if(hup_flag == 0)
++					{
++						hup_flag = 1;
++						reconfig_ev = cur_event;
++						if (start_config_manager(cur_event)) {
++							audit_format_signal_info(hup,
++								sizeof(hup),
++								"reconfigure state=no-change",
++								&cur_event->reply,
++								"failed");
++							send_audit_event(AUDIT_DAEMON_CONFIG,
++									hup);
++							hup_flag = 0;
++						}
 +					}
-+				}
-+				else
-+				{
- 					audit_format_signal_info(hup,
--								 sizeof(hup),
--						 "reconfigure state=no-change",
--							 &cur_event->reply,
--								 "failed");
-+							 	sizeof(hup),
-+					 	"reconfigure state=no-change",
-+						 	&cur_event->reply,
-+							 	"failed");
- 					send_audit_event(AUDIT_DAEMON_CONFIG,
--							 hup);
-+						 	hup);
- 				}
- 				cur_event = NULL;
- 				hup_info_requested = 0;
-@@ -571,9 +587,15 @@ static void pipe_handler(struct ev_loop *loop, struct ev_io *io,
++					else
++					{
+ 						audit_format_signal_info(hup,
+ 								 sizeof(hup),
+ 						 "reconfigure state=no-change",
+@@ -576,9 +592,15 @@ static void pipe_handler(struct ev_loop *loop, struct ev_io *io,
  	// Drain the pipe - won't block because libev sets non-blocking mode
  	read(pipefds[0], buf, sizeof(buf));
  	enqueue_event(reconfig_ev);
@@ -95,5 +83,5 @@ index fa783a2..0d76e0c 100644
  {
  	const char *msg = "ready\n";
 -- 
-1.8.3.1
+2.27.0
 

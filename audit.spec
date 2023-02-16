@@ -4,7 +4,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            5
+Release:            6
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -35,6 +35,12 @@ Patch21:            backport-When-interpreting-if-val-is-NULL-return-an-empty-st
 Patch22:            backport-auditd.service-Restart-on-failure-ignoring-some-exit.patch
 Patch23:            backport-0001-In-auditd-close-the-logging-file-descriptor-when-log.patch
 Patch24:            backport-0002-In-auditd-close-the-logging-file-descriptor-when-log.patch
+Patch25:            backport-In-auditd-release-the-async-flush-lock-on-stop.patch
+Patch26:            backport-auditd-cleanup-krb5-memory-leaks-on-error-paths.patch
+Patch27:            backport-audisp-remote-cleanup-krb5-memory-leaks-on-error-paths.patch
+Patch28:            backport-Final-kerberos-leak-fixups.patch
+Patch29:            backport-time_t-is-not-an-int-anymore.patch
+Patch30:            backport-krb5_cc_store_cred-takes-custody-of-my_creds-so-we-do-not-need-to-keep-it-around.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -389,6 +395,15 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Tue Feb 14 2023 zhangguangzhi <zhangguangzhi3@huawei.com> - 1:3.0-6
+- backport some patches
+  In auditd release the async flush lock on stop
+  auditd cleanup krb5 memory leaks on error paths
+  audisp remote cleanup krb5 memory leaks on error paths
+  Final kerberos leak fixups
+  time_t is not an int anymore
+  krb5_cc_store_cred takes custody of my_creds so we do not need to keep it around
+
 * Tue Mar 22 2022 yixiangzhike <yixiangzhike007@163.com> - 3.0-5
 - rebuild for upgrade
 

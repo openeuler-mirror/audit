@@ -1,0 +1,26 @@
+From a75e42921997cab4cb9b2a01107441695239f764 Mon Sep 17 00:00:00 2001
+From: Steve Grubb <sgrubb@redhat.com>
+Date: Mon, 11 Jul 2022 17:53:26 -0400
+Subject: asprintf can return a negative number
+
+Conflict:context adaptation
+---
+ audisp/audispd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/audisp/audispd.c b/audisp/audispd.c
+index f20b38d..77cb7b2 100644
+--- a/audisp/audispd.c
++++ b/audisp/audispd.c
+@@ -476,7 +476,7 @@ static int event_loop(void)
+ 		event_t *e;
+ 		const char *type;
+ 		char *v, *ptr, unknown[32];
+-		unsigned int len;
++		int len;
+ 		lnode *conf;
+ 
+ 		/* This is where we block until we have an event */
+-- 
+2.27.0
+

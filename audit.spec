@@ -4,7 +4,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0
-Release:            9
+Release:            10
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -44,6 +44,7 @@ Patch30:            backport-krb5_cc_store_cred-takes-custody-of-my_creds-so-we-
 Patch31:            backport-asprintf-can-return-a-negative-number.patch
 Patch32:            backport-Cleanup-gssapi-code.patch
 Patch33:            backport-Fix-another-krb5-memory-leak.patch
+Patch34:            backport-Try-to-interpret-OPENAT2-fields-correctly.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -396,6 +397,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Thu Mar 23 2023 dongyuzhen <dongyuzhen@h-partners.com> - 1:3.0-10
+- backport patches from upstream
+
 * Sat Mar 4 2023 zhangguangzhi<zhangguangzhi3@huawei.com> - 1:3.0-9
 - del golang_arches for check
 

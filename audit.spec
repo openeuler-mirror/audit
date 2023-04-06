@@ -2,7 +2,7 @@ Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
 Version:            3.0.9
-Release:            2
+Release:            3
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -105,6 +105,8 @@ autoreconf -f -i
            --with-python3=yes \
            --enable-gssapi-krb5=yes --with-arm --with-aarch64 \
            --with-libcap-ng=yes --enable-zos-remote \
+           CC_FOR_BUILD=${CC} \
+           CPP_FOR_BUILD=${CPP} \
 %ifarch %{golang_arches}
            --with-golang \
 %endif
@@ -365,6 +367,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Fri Apr 14 2023 jammyjellyfish <jammyjellyfish255@outlook.com> - 1:3.0.9-3
+- Support specify CC
+
 * Fri Mar 24 2023 dongyuzhen <dongyuzhen@h-partners.com> - 1:3.0.9-2
 - backport patches from upstream
 

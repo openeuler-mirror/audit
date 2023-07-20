@@ -62,14 +62,14 @@ diff --git a/lib/libaudit.h b/lib/libaudit.h
 index 3a8e8c8..16af222 100644
 --- a/lib/libaudit.h
 +++ b/lib/libaudit.h
-@@ -561,6 +561,7 @@ typedef enum {
+@@ -594,6 +594,7 @@ typedef enum {
  	MACH_S390X,
  	MACH_S390,
  	MACH_ALPHA,	// Deprecated but has to stay
 +	MACH_SW_64,	// Deprecated but has to stay
  	MACH_ARM,
  	MACH_AARCH64,
- 	MACH_PPC64LE
+ 	MACH_PPC64LE,
 diff --git a/src/libev/ev.c b/src/libev/ev.c
 index 5ff936c..72765b5 100644
 --- a/src/libev/ev.c

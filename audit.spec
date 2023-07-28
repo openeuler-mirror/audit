@@ -1,8 +1,8 @@
 Summary:            User space tools for kernel auditing
 Name:               audit
 Epoch:              1
-Version:            3.0.9
-Release:            2
+Version:            3.1.1
+Release:            1
 License:            GPLv2+ and LGPLv2+
 URL:                https://people.redhat.com/sgrubb/audit/
 Source0:            https://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
@@ -14,7 +14,7 @@ Patch2:          bugfix-audit-reload-coredump.patch
 Patch3:          audit-Add-sw64-architecture.patch
 Patch4:          backport-audit-flex-array-workaround.patch
 Patch5:          backport-audit-undo-flex-array.patch
-Patch6:          backport-Try-to-interpret-OPENAT2-fields-correctly.patch
+Patch6:          backport-auditswig.i-avoid-setter-generation-for-audit_rule_d.patch
 
 BuildRequires:      gcc swig libtool systemd kernel-headers >= 2.6.29
 BuildRequires:      openldap-devel krb5-devel libcap-ng-devel
@@ -325,6 +325,7 @@ fi
 %config(noreplace) %attr(640,root,root) /etc/audit/plugins.d/syslog.conf
 %attr(750,root,root) /sbin/audisp-remote
 %attr(750,root,root) /sbin/audisp-syslog
+%attr(750,root,root) /sbin/audisp-af_unix
 %attr(700,root,root) %dir %{_var}/spool/audit
 
 %files -n audispd-plugins-zos
@@ -365,6 +366,9 @@ fi
 %attr(644,root,root) %{_mandir}/man8/*.8.gz
 
 %changelog
+* Mon Jul 24 2023 zhengxiaoxiao<zhengxiaoxiao2@huawei.com> - 1:3.1.1-1
+- update version to 3.1.1
+
 * Fri Mar 24 2023 dongyuzhen <dongyuzhen@h-partners.com> - 1:3.0.9-2
 - backport patches from upstream
 
